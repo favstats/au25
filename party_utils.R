@@ -385,24 +385,19 @@
 all_dat <- readRDS("../data/all_data.rds")
 
 
-color_dat <- data.frame(
-  party = c("ACDP", "ACT", "AMC", "ANC", "ATM", "ActionSA", "Al Jama-ah", "BOSA", "Company", "DA",
-            "ELF-SA", "Free Democrats", "GOOD", "Government Institution", "Hope4SA", "IFP",
-            "Independent", "Media Organization", "NGO/Civil Society", "OHM", "Other Political Party",
-            "Referendum Party", "Sun Party", "Unknown", "Vryheidsfront Plus"),
-  colors = c("#ED1F24", "#AA1A2A", "#A000FF", "#006600", "#003399", "#90660A", "#009000", "#0000FF", "#0AAAFF", "#005BA6",
-             "#dFAddd", "#AA3399", "#FFB81C", "varies", "#000071", "#0F1111",
-             "varies", "varies", "varies", "#AAAAAA", "unknown",
-             "#AFFA2A", "#FFFA2A", "unknown", "#FF9933")
-)
 
-classified_advertisers <- read_csv2("../classified_advertisers.csv") %>% 
-  mutate_all(as.character)
 
-classified_advertisers <- readr::read_rds("https://github.com/favstats/wtm_au/raw/refs/heads/main/data/all_dat.rds") %>% 
-  select(page_id, page_name, classification = party) %>%
-  distinct(page_id, .keep_all = T) %>% 
-  filter(classification != "unknown")
+classified_advertisers <- read_csv("../data/6ef97a03-5215-4f08-868c-6a5325a60ddc.csv")%>% filter(entities_groups.group_name == "National Political Parties")  %>% 
+  select(page_id = advertisers_platforms.advertiser_platform_ref, page_name = advertisers_platforms.advertiser_platform_name, classification = entities.name, colo = entities.color) %>%
+  distinct(page_id, .keep_all = T)
+
+color_dat <- classified_advertisers %>% distinct(classification, colo) %>% 
+  rename(party = classification, colors = colo)
+
+# classified_advertisers <- readr::read_rds("https://github.com/favstats/wtm_au/raw/refs/heads/main/data/all_dat.rds") %>% 
+#   select(page_id, page_name, classification = party) %>%
+#   distinct(page_id, .keep_all = T) %>% 
+#   filter(classification != "unknown")
 
 election_dat30 <- readRDS("../data/election_dat30.rds")  %>% 
   as_tibble() %>% 
@@ -412,7 +407,7 @@ election_dat30 <- readRDS("../data/election_dat30.rds")  %>%
   # left_join(all_dat %>% select(page_id, party)) %>% 
   drop_na(party) %>%
   mutate(internal_id = page_id) %>%
-  filter(!(party %in% c("And", "AND", "Reg", "Oth", "Gov", "Sta", "Inv", "Pol", "Company", "Other Political Party","Government Institution","Independent", "Media Organization", "NGO/Civil Society","Unknown"))) %>% 
+  filter(!(party %in% c("Others","And", "AND", "Reg", "Oth", "Gov", "Sta", "Inv", "Pol", "Company", "Other Political Party","Government Institution","Independent", "Media Organization", "NGO/Civil Society","Unknown"))) %>% 
   # mutate(party = entities.name) %>% 
   drop_na(party) %>% 
   mutate(total_spend_formatted = readr::parse_number(total_spend_formatted)) %>% 
@@ -431,7 +426,7 @@ election_dat7 <- readRDS("../data/election_dat7.rds")  %>%
   # left_join(all_dat %>% select(page_id, party)) %>% 
   drop_na(party) %>%
   mutate(internal_id = page_id) %>%
-  filter(!(party %in% c("And", "AND", "Reg", "Oth", "Gov", "Sta", "Inv", "Pol", "Company", "Other Political Party","Government Institution","Independent", "Media Organization", "NGO/Civil Society","Unknown"))) %>% 
+  filter(!(party %in% c("Others","And", "AND", "Reg", "Oth", "Gov", "Sta", "Inv", "Pol", "Company", "Other Political Party","Government Institution","Independent", "Media Organization", "NGO/Civil Society","Unknown"))) %>% 
   # mutate(party = entities.name) %>% 
   drop_na(party)  %>% 
   mutate(total_spend_formatted = readr::parse_number(total_spend_formatted)) %>% 
@@ -450,23 +445,23 @@ currency_symbol <- "$"
 #   distinct(party, entities.color) %>% 
 #   rename(colors = entities.color)
 
-color_dat <- data.frame(
-  party = c("ACP-NPA", "AD", "AG", "ALP", "C", "CLP", "FFP", "Katter", "LNPQ", "LPA", "ONP", "Reason", "United Australia Party"),
-  colors = c("#006644",  # ACP-NPA (Agrarian/Nationalist - Green)
-             "#BFDA01",  # AD (Liberal/Gold)
-             "#3F9C35",  # AG (Australian Greens - Green)
-             "#DE3533",  # ALP (Australian Labor Party - Red)
-             "#00008B",  # C (Conservative - Dark Blue)
-             "#CC0000",  # CLP (Country Liberal Party - Red)
-             "#FFCC00",  # FFP (Family First Party - Yellow)
-             "#800000",  # Katter's Australian Party - Maroon
-             "#034694",  # LNPQ (Liberal National Party of Queensland - Blue)
-             "#0047AB",  # LPA (Liberal Party of Australia - Blue)
-             "#FF6600",  # ONP (One Nation Party - Orange)
-             "#7E4798",  # Reason Party - Purple
-             "#FFD700"   # United Australia Party - Gold
-  )
-)
+# color_dat <- data.frame(
+#   party = c("ACP-NPA", "AD", "AG", "ALP", "C", "CLP", "FFP", "Katter", "LNPQ", "LPA", "ONP", "Reason", "United Australia Party"),
+#   colors = c("#006644",  # ACP-NPA (Agrarian/Nationalist - Green)
+#              "#BFDA01",  # AD (Liberal/Gold)
+#              "#3F9C35",  # AG (Australian Greens - Green)
+#              "#DE3533",  # ALP (Australian Labor Party - Red)
+#              "#00008B",  # C (Conservative - Dark Blue)
+#              "#CC0000",  # CLP (Country Liberal Party - Red)
+#              "#FFCC00",  # FFP (Family First Party - Yellow)
+#              "#800000",  # Katter's Australian Party - Maroon
+#              "#034694",  # LNPQ (Liberal National Party of Queensland - Blue)
+#              "#0047AB",  # LPA (Liberal Party of Australia - Blue)
+#              "#FF6600",  # ONP (One Nation Party - Orange)
+#              "#7E4798",  # Reason Party - Purple
+#              "#FFD700"   # United Australia Party - Gold
+#   )
+# )
 
 
 color_dat <- distinct(color_dat, party, .keep_all = TRUE) %>% drop_na()
@@ -509,3 +504,16 @@ most_left_party <- "The Green Party"
 # # Reset locale back to the original if necessary
 # Sys.setlocale("LC_TIME", "C")
 # print("oo")
+
+color_dat <- color_dat %>% 
+  mutate(colors = case_when(
+    colors == "#aaa" ~ "#A9A9A9",
+    colors == "orange" ~ "#f77604",
+    colors == "green" ~ "#7aba2d",
+    colors == "darkgray" ~ "#A9A9A9",
+    colors == "darkblue" ~ "#000080",
+    colors == "lightblue" ~ "#ADD8E6",
+    colors == "#ccc" ~ "#cccccc",
+    is.na(colors) ~ "#00BFFF",
+    T ~ colors
+  ))
