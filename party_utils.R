@@ -407,7 +407,7 @@ election_dat30 <- readRDS("../data/election_dat30.rds")  %>%
   # left_join(all_dat %>% select(page_id, party)) %>% 
   drop_na(party) %>%
   mutate(internal_id = page_id) %>%
-  filter(!(party %in% c("Others","And", "AND", "Reg", "Oth", "Gov", "Sta", "Inv", "Pol", "Company", "Other Political Party","Government Institution","Independent", "Media Organization", "NGO/Civil Society","Unknown"))) %>% 
+  filter(!(party %in% c("Others","And", "AND", "Reg", "Oth", "Gov", "Sta", "Inv", "Pol", "Company", "Other Political Party","Government Institution","Independent", "Media Organization", "NGO/Civil Society","Unknown", "Government"))) %>% 
   # mutate(party = entities.name) %>% 
   drop_na(party) %>% 
   mutate(total_spend_formatted = readr::parse_number(total_spend_formatted)) %>% 
@@ -426,7 +426,7 @@ election_dat7 <- readRDS("../data/election_dat7.rds")  %>%
   # left_join(all_dat %>% select(page_id, party)) %>% 
   drop_na(party) %>%
   mutate(internal_id = page_id) %>%
-  filter(!(party %in% c("Others","And", "AND", "Reg", "Oth", "Gov", "Sta", "Inv", "Pol", "Company", "Other Political Party","Government Institution","Independent", "Media Organization", "NGO/Civil Society","Unknown"))) %>% 
+  filter(!(party %in% c("Others","And", "AND", "Reg", "Oth", "Gov", "Sta", "Inv", "Pol", "Company", "Other Political Party","Government Institution","Independent", "Media Organization", "NGO/Civil Society","Unknown", "Government"))) %>% 
   # mutate(party = entities.name) %>% 
   drop_na(party)  %>% 
   mutate(total_spend_formatted = readr::parse_number(total_spend_formatted)) %>% 
