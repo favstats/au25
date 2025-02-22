@@ -64,6 +64,8 @@ The chart below displays the geographical targeting of that political parties on
 
 #### Search
 
+
+
 ```{js}
 // Custom range filter with value label
 function rangeFilter(column, state) {
@@ -134,20 +136,20 @@ pacman::p_load(fontawesome, reactable, htmltools)
 
 ```{r}
 
-
-htmltools::browsable(
-  tagList(
-
-  election_dat30 %>%
+secodndround <-   election_dat30 %>%
     filter(type == "location") %>% 
       mutate(amount_spent = as.numeric(total_spend_formatted)*total_spend_pct) %>% 
-    select(amount_spent, page_name, value, location_type,is_exclusion, num_ads, party) %>%
+    select(amount_spent, page_name, value, location_type,is_exclusion, num_ads, party, page_id) %>%
     mutate(is_exclusion = as.logical(is_exclusion)) %>% 
     mutate(value = str_remove_all(value, ", Australia")) %>% 
     arrange(desc(amount_spent)) %>% 
     filter(!is_exclusion) %>% 
-    select(-is_exclusion) %>% 
+    select(-is_exclusion)
+htmltools::browsable(
+  tagList(
+
   reactable(
+    secodndround,
   columns = list(
     amount_spent = colDef(
       name = "💰 Spending",
@@ -173,19 +175,34 @@ htmltools::browsable(
       #   )
       # }
     ),
-    page_name = colDef(
-      name = "📌 Page",
-      cell = function(value) tagList(
-        # icon("facebook"),  # Use appropriate icon
-        div(
-          style = "margin-left: 8px; display: inline-block; vertical-align: middle;",
-          value
-        )
-      ),
-      filterable = TRUE,
-      filterInput = dataListFilter("elex")
-
-    ),
+page_name = colDef(
+  name = "📌 Page",
+        cell = function(value, index) {
+          # Access row-specific data using `index`
+          theid <- secodndround[index, "page_id"]
+    
+    # Fallback for missing IDs
+    if (is.na(theid) || length(theid) == 0) theid <- "unknown_page"
+    
+    # Build the hyperlink
+    href <- if (theid != "unknown_page") {
+      paste0("https://facebook.com/", theid)
+    } else {
+      "#"
+    }
+    
+    # Return the link
+    tags$a(
+      href = href,
+      target = "_blank",
+      rel = "noopener noreferrer",
+      style = "margin-left: 8px; color: #2196f3; text-decoration: none;",
+      value  # Display the original value, not value_clean
+    )
+  },
+  filterable = TRUE,
+  filterInput = dataListFilter("elex")
+),
     value = colDef(      
       filterInput = dataListFilter("elex"),
 
@@ -219,16 +236,31 @@ a(
     ),
     num_ads = colDef(
       name = "#️⃣ Ads",
-      cell = function(value) tagList(
-        # icon("facebook"),  # Use appropriate icon
-        div(
-          style = "margin-left: 8px; display: inline-block; vertical-align: middle;",
-          value
-        )
-      ),
+        cell = function(value, index) {
+          # Access row-specific data using `index`
+          theid <- secodndround[index, "page_id"]
+    
+    # Fallback for missing IDs
+    if (is.na(theid) || length(theid) == 0) theid <- "unknown_page"
+    
+    # Build the hyperlink
+    href <- if (theid != "unknown_page") {
+      paste0("https://www.facebook.com/ads/library/?view_all_page_id=", theid)
+    } else {
+      "#"
+    }
+    # Return the link
+    tags$a(
+      href = href,
+      target = "_blank",
+      rel = "noopener noreferrer",
+      style = "margin-left: 8px; color: #2196f3; text-decoration: none;",
+      value  # Display the original value, not value_clean
+    )
+    },
       filterable = TRUE,
       filterMethod = JS("filterMinValue"),
-      filterInput = JS("rangeFilter"),
+      filterInput = JS("rangeFilter")
     ),
     # is_exclusion = colDef(
     #   name = "🚫 Exclusion",
@@ -270,8 +302,10 @@ a(
       },
       filterable = TRUE,
       filterInput = dataListFilter("elex")
-    )
-  ),
+    ),
+        # Hide the `page_id` column
+        page_id = colDef(show = FALSE)
+      ),
   defaultPageSize = 10,
   # searchable = TRUE,
   showPageSizeOptions = TRUE,
@@ -327,8 +361,11 @@ a(
 )
 ```
 
+<br>
 
+The table above shows spending data from Meta at the advertiser level, broken down per targeting criterion. This means we can’t account for combinations of targeting criteria.
 
+For example, if one ad targets two ZIP codes with $100 and another targets just one of those ZIP codes with $100, we can’t separate the overlap. In this case, we record $200 spent on the shared ZIP code and $100 on the other.
 
 #### Regions
 
@@ -522,23 +559,22 @@ The following graphs depict the geographic locations that certain political adve
 
 
 
-
 ```{r}
 
-
-htmltools::browsable(
-  tagList(
-
-  election_dat30 %>%
+secodndround <-   election_dat30 %>%
     filter(type == "location") %>% 
       mutate(amount_spent = as.numeric(total_spend_formatted)*total_spend_pct) %>% 
-    select(amount_spent, page_name, value, location_type,is_exclusion, num_ads, party) %>%
+    select(amount_spent, page_name, value, location_type,is_exclusion, num_ads, party, page_id) %>%
     mutate(is_exclusion = as.logical(is_exclusion)) %>% 
     mutate(value = str_remove_all(value, ", Australia")) %>% 
     arrange(desc(amount_spent)) %>% 
     filter(is_exclusion) %>% 
-    select(-is_exclusion) %>% 
+    select(-is_exclusion)
+htmltools::browsable(
+  tagList(
+
   reactable(
+    secodndround,
   columns = list(
     amount_spent = colDef(
       name = "💰 Spending",
@@ -564,19 +600,34 @@ htmltools::browsable(
       #   )
       # }
     ),
-    page_name = colDef(
-      name = "📌 Page",
-      cell = function(value) tagList(
-        # icon("facebook"),  # Use appropriate icon
-        div(
-          style = "margin-left: 8px; display: inline-block; vertical-align: middle;",
-          value
-        )
-      ),
-      filterable = TRUE,
-      filterInput = dataListFilter("elex2")
-
-    ),
+page_name = colDef(
+  name = "📌 Page",
+        cell = function(value, index) {
+          # Access row-specific data using `index`
+          theid <- secodndround[index, "page_id"]
+    
+    # Fallback for missing IDs
+    if (is.na(theid) || length(theid) == 0) theid <- "unknown_page"
+    
+    # Build the hyperlink
+    href <- if (theid != "unknown_page") {
+      paste0("https://facebook.com/", theid)
+    } else {
+      "#"
+    }
+    
+    # Return the link
+    tags$a(
+      href = href,
+      target = "_blank",
+      rel = "noopener noreferrer",
+      style = "margin-left: 8px; color: #2196f3; text-decoration: none;",
+      value  # Display the original value, not value_clean
+    )
+  },
+  filterable = TRUE,
+  filterInput = dataListFilter("elex2")
+),
     value = colDef(      
       filterInput = dataListFilter("elex2"),
 
@@ -610,16 +661,31 @@ a(
     ),
     num_ads = colDef(
       name = "#️⃣ Ads",
-      cell = function(value) tagList(
-        # icon("facebook"),  # Use appropriate icon
-        div(
-          style = "margin-left: 8px; display: inline-block; vertical-align: middle;",
-          value
-        )
-      ),
+        cell = function(value, index) {
+          # Access row-specific data using `index`
+          theid <- secodndround[index, "page_id"]
+    
+    # Fallback for missing IDs
+    if (is.na(theid) || length(theid) == 0) theid <- "unknown_page"
+    
+    # Build the hyperlink
+    href <- if (theid != "unknown_page") {
+      paste0("https://www.facebook.com/ads/library/?view_all_page_id=", theid)
+    } else {
+      "#"
+    }
+    # Return the link
+    tags$a(
+      href = href,
+      target = "_blank",
+      rel = "noopener noreferrer",
+      style = "margin-left: 8px; color: #2196f3; text-decoration: none;",
+      value  # Display the original value, not value_clean
+    )
+    },
       filterable = TRUE,
       filterMethod = JS("filterMinValue"),
-      filterInput = JS("rangeFilter"),
+      filterInput = JS("rangeFilter")
     ),
     # is_exclusion = colDef(
     #   name = "🚫 Exclusion",
@@ -661,8 +727,10 @@ a(
       },
       filterable = TRUE,
       filterInput = dataListFilter("elex2")
-    )
-  ),
+    ),
+        # Hide the `page_id` column
+        page_id = colDef(show = FALSE)
+      ),
   defaultPageSize = 10,
   # searchable = TRUE,
   showPageSizeOptions = TRUE,
@@ -712,13 +780,18 @@ a(
 ),
     tags$button(
       tagList(fontawesome::fa("download"), "Download as CSV"),
-      onclick = "Reactable.downloadDataCSV('elex2', 'excluding.csv')"
+      onclick = "Reactable.downloadDataCSV('elex2', 'targeting.csv')"
     )
 )
 )
 ```
 
 
+<br>
+
+The table above shows spending data from Meta at the advertiser level, broken down per targeting criterion. This means we can’t account for combinations of targeting criteria.
+
+For example, if one ad targets two ZIP codes with $100 and another targets just one of those ZIP codes with $100, we can’t separate the overlap. In this case, we record $200 spent on the shared ZIP code and $100 on the other.
 
 
 
