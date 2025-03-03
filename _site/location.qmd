@@ -780,7 +780,7 @@ a(
 ),
     tags$button(
       tagList(fontawesome::fa("download"), "Download as CSV"),
-      onclick = "Reactable.downloadDataCSV('elex2', 'targeting.csv')"
+      onclick = "Reactable.downloadDataCSV('elex2', 'exclusion.csv')"
     )
 )
 )
