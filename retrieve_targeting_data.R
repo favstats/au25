@@ -10,7 +10,15 @@ library(tidyverse)
 library(lubridate)
 library(httr2)
 
-thecntry <- "ZA"
+inspck <- installed.packages() %>% 
+  as_tibble() %>% 
+  pull(Package)
+
+if(!("metatargetr" %in% inspck)){
+  remotes::install_github('favstats/metatargetr')
+}
+
+thecntry <- "AU"
 
 
 thepkgs <-  installed.packages() %>% as_tibble() %>% pull(Package)
