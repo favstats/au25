@@ -98,7 +98,6 @@ jobs:
             any::httr2
             any::openssl
             any::priceR
-            any::metatargetr
       - name: "Script - Update Dashboard"
         run: Rscript 'start.R'
       - name: "Commit"

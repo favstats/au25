@@ -41,8 +41,7 @@ Imports:
 		arrow,
 		httr2,
 		openssl,
-		priceR,
-		metatargetr
+		priceR
 Depends:
     R (>= 3.0.0)
 RoxygenNote: 5.0.1
