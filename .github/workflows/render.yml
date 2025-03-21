@@ -16,6 +16,7 @@ jobs:
       contents: write
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      WHO_TARGETS_TOKEN: ${{ secrets.WHO_TARGETS_TOKEN }}
     steps:
       - uses: quarto-dev/quarto-actions/setup@v2
       - name: Add Quarto to PATH
