@@ -134,7 +134,7 @@ add_ribbons3 <- function(x, adv, col) {
 }
 ```
 
-Here you can see the expenditures of political parties in the lead-up to the elections according to the latest data.
+Here you can see the expenditures of political parties in the lead-up to the elections according to the latest data. For more detailed info on spending and content see the Who Targets Me [Trends dashboard](https://trends.whotargets.me/dashboard/countries).
 
 
 
