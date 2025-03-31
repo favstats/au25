@@ -645,4 +645,3 @@ ggl_get_spending <- function(advertiser_id,
   
 }
 
-

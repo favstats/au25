@@ -302,43 +302,74 @@ eval(parse(text = paste0("gt(the_table7, rowname_col = 'party_col') %>% fmt_mark
 
 ## Google
 
-Work in Progress
+```{r}
 
-```{r, eval=F}
+```
+
+```{r, eval=T}
 # library(metatargetr)
 
-Romania_2024_google <- read_csv(here::here("data/Romania 2024 - google.csv"))
+uswtm <- readr::read_csv("../wtmdata.csv") 
 
 
-# days30ggl <- Romania_2024_google %>%
-#   drop_na(party) %>% 
-#   .$Advertiser_ID %>% 
-#   map_dfr(~{
-#     ggl_get_spending(
-#       advertiser_id = .x,
-#       start_date = "2024-11-02",
-#       end_date = "2024-12-01",
-#       cntry = "RO"
-#     ) %>% mutate_all(as.character)    
-#   }) %>% 
-#   mutate(Advertiser_ID = advertiser_id) %>% 
-#   left_join(Romania_2024_google)
-#   
-# saveRDS(days30ggl, "../data/days30ggl.rds")
+# count(enti)
 
-days30ggl <-  readRDS(here::here("data/days30ggl.rds"))
+all_dat <-
+  uswtm %>% 
+  mutate(party = entities.short_name) %>% 
+  mutate(page_id = advertisers_platforms.advertiser_platform_ref) %>% 
+  mutate(color = entities.color) %>% 
+  filter(platforms.name == "Google") %>% 
+  mutate(page_name = name)%>%
+  distinct(page_id, .keep_all = T) %>%
+  add_count(page_name, sort  = T) %>%
+  mutate(remove_em = n >= 2 & str_ends(page_id, "0")) %>%
+  filter(!remove_em) %>%
+  # filter(n >= 2) %>%
+  # filter(n >= 2 & str_ends(page_id, "0", negate = T)) %>%
+  select(-n)  %>%
+  mutate_all(as.character)  %>%
+  filter(!(party %in% c("Reg", "Gov", "Sta", "Inv", "Pol", "Company","Government Institution","Independent", "Media Organization", "NGO/Civil Society","Unknown", "Government", "Federal Government", "FedGov", "LocGov"))) 
+
+# debu
+# ggl_get_spending(advertiser_id = "AR09673365123485401089", cntry = "AU",
+#       start_date = as.Date(election_dat30$ds[1]) - 30,
+#       end_date = election_dat30$ds[1])
+
+days30ggl <- all_dat %>%
+  drop_na(party) %>%
+  # filter(page_id == "AR09673365123485401089") %>% 
+  pull(page_id) %>% 
+  # .[10] %>% 
+  map_dfr(~{
+    Sys.sleep(1)
+    fin <- ggl_get_spending(
+      advertiser_id = .x,
+      start_date = as.Date(election_dat30$ds[1]) - 30,
+      end_date = election_dat30$ds[1],
+      cntry = sets$cntry
+    ) %>% mutate_all(as.character) %>% 
+      mutate(page_id = .x)
+    # print(fin)
+    return(fin)
+  }, .progress = F) %>%
+  left_join(all_dat)
+
+saveRDS(days30ggl, "../data/days30ggl.rds")
+
+# days30ggl <-  readRDS(here::here("data/days30ggl.rds"))
   
-# the_table30 <- get_table_dat(days30ggl %>% mutate(internal_id = advertiser_id, total_spend_formatted= spend_RON, page_name = advertiser_name ), party) %>%
+# the_table30 <- get_table_dat(days30ggl %>% mutate(internal_id = advertiser_id, total_spend_formatted= spend_AUD, page_name = advertiser_name ), party) %>%
 #   arrange(desc(parse_number(`Total Spend`)))
 
 the_table30 <- days30ggl %>% 
   as_tibble() %>% 
   mutate(number_of_ads = as.numeric(number_of_ads)) %>% 
-  mutate(spend_RON = as.numeric(spend_RON)) %>% 
+  mutate(spend_AUD = as.numeric(spend_AUD)) %>% 
   group_by(party) %>% 
   summarise(`Number of Advertisers` = n(),
-            spend_RON = sum(spend_RON),
-            number_of_ads = sum(number_of_ads)) %>% 
+            spend_AUD = sum(spend_AUD, na.rm = T),
+            number_of_ads = sum(number_of_ads, na.rm = T)) %>% 
   mutate(party_col = party) %>% 
   left_join(all_dat %>% distinct(party, entities.name) %>% drop_na(entities.name
 )) %>% 
@@ -347,57 +378,61 @@ the_table30 <- days30ggl %>%
   select(-party) %>% 
   select(-entities.name)  %>%
   drop_na(party_col) %>% 
-  arrange(desc(spend_RON)) %>%
-  mutate(`Total Spend` = scales::comma(spend_RON)) %>%
+  arrange(desc(spend_AUD)) %>%
+  mutate(`Total Spend` = scales::comma(spend_AUD)) %>%
   mutate(`Number of Ads` = scales::comma(number_of_ads)) %>% 
-  select(-spend_RON, -number_of_ads)
+  select(-spend_AUD, -number_of_ads)
 
 
 sum30 <- days30ggl %>% 
   as_tibble() %>% 
   mutate(number_of_ads = as.numeric(number_of_ads)) %>% 
-  mutate(spend_RON = as.numeric(spend_RON)) %>% 
+  mutate(spend_AUD = as.numeric(spend_AUD)) %>% 
   group_by(party) %>% 
   summarise(`Number of Advertisers` = n(),
-            spend_RON = sum(spend_RON),
+            spend_AUD = sum(spend_AUD),
             number_of_ads = sum(number_of_ads)) %>% 
   mutate(party_col = party)  %>%
     # # filter(main_currency == the_currency) %>%
     # distinct(internal_id, .keep_all = T) %>%
-    summarize(total_spend_formatted = sum(spend_RON, na.rm = T),
+    summarize(total_spend_formatted = sum(spend_AUD, na.rm = T),
               total_num_ads = sum(number_of_ads))
 
 
+days7ggl <- all_dat %>%
+  drop_na(party) %>%
+  # filter(page_id == "AR09673365123485401089") %>% 
+  pull(page_id) %>% 
+  # .[10] %>% 
+  map_dfr(~{
+    Sys.sleep(1)
+    fin <- ggl_get_spending(
+      advertiser_id = .x,
+      start_date = as.Date(election_dat7$ds[1]) - 7,
+      end_date = election_dat7$ds[1],
+      cntry = sets$cntry
+    ) %>% mutate_all(as.character) %>% 
+      mutate(page_id = .x)
+    # print(fin)
+    return(fin)
+  }) %>%
+  left_join(all_dat)
 
-# days7ggl <- Romania_2024_google %>%
-#   drop_na(party) %>% 
-#   .$Advertiser_ID %>% 
-#   map_dfr(~{
-#     ggl_get_spending(
-#       advertiser_id = .x,
-#       start_date = "2024-11-25",
-#       end_date = "2024-12-01",
-#       cntry = "RO"
-#     ) %>% mutate_all(as.character)    
-#   }) %>% 
-#   mutate(Advertiser_ID = advertiser_id) %>% 
-#   left_join(Romania_2024_google)
-#   
-# saveRDS(days7ggl, "data/days7ggl.rds")
+saveRDS(days7ggl, "../data/days7ggl.rds")
   
-days7ggl <-  readRDS(here::here("data/days7ggl.rds"))
+# days7ggl <-  readRDS(here::here("data/days7ggl.rds"))
 
-# the_table7 <- get_table_dat(days7ggl %>% mutate(internal_id = advertiser_id, total_spend_formatted= spend_RON, page_name = advertiser_name ), party) %>%
+# the_table7 <- get_table_dat(days7ggl %>% mutate(internal_id = advertiser_id, total_spend_formatted= spend_AUD, page_name = advertiser_name ), party) %>%
 #   arrange(desc(parse_number(`Total Spend`)))
 
 the_table7 <- days7ggl %>% 
   as_tibble() %>% 
   mutate(number_of_ads = as.numeric(number_of_ads)) %>% 
-  mutate(spend_RON = as.numeric(spend_RON)) %>% 
+  mutate(spend_AUD = as.numeric(spend_AUD)) %>% 
   group_by(party) %>% 
   summarise(`Number of Advertisers` = n(),
-            spend_RON = sum(spend_RON),
-            number_of_ads = sum(number_of_ads)) %>% 
+            spend_AUD = sum(spend_AUD,na.rm =T),
+            number_of_ads = sum(number_of_ads,na.rm =T)) %>% 
   mutate(party_col = party) %>% 
   left_join(all_dat %>% distinct(party, entities.name) %>% drop_na(entities.name
 )) %>% 
@@ -406,23 +441,23 @@ the_table7 <- days7ggl %>%
   select(-party) %>% 
   select(-entities.name)  %>%
   drop_na(party_col) %>% 
-  arrange(desc(spend_RON)) %>%
-  mutate(`Total Spend` = scales::comma(spend_RON)) %>%
+  arrange(desc(spend_AUD)) %>%
+  mutate(`Total Spend` = scales::comma(spend_AUD)) %>%
   mutate(`Number of Ads` = scales::comma(number_of_ads)) %>% 
-  select(-spend_RON, -number_of_ads)
+  select(-spend_AUD, -number_of_ads)
 
 sum7 <- days7ggl %>% 
   as_tibble() %>% 
   mutate(number_of_ads = as.numeric(number_of_ads)) %>% 
-  mutate(spend_RON = as.numeric(spend_RON)) %>% 
+  mutate(spend_AUD = as.numeric(spend_AUD)) %>% 
   group_by(party) %>% 
   summarise(`Number of Advertisers` = n(),
-            spend_RON = sum(spend_RON),
+            spend_AUD = sum(spend_AUD),
             number_of_ads = sum(number_of_ads)) %>% 
   mutate(party_col = party)  %>%
     # # filter(main_currency == the_currency) %>%
     # distinct(internal_id, .keep_all = T) %>%
-    summarize(total_spend_formatted = sum(spend_RON, na.rm = T),
+    summarize(total_spend_formatted = sum(spend_AUD, na.rm = T),
               total_num_ads = sum(number_of_ads))
 
 ```
