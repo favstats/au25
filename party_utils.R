@@ -411,10 +411,10 @@ election_dat30 <- readRDS("../data/election_dat30.rds")  %>%
   filter(!(party %in% c("Reg", "Gov", "Sta", "Inv", "Pol", "Company","Government Institution","Independent", "Media Organization", "NGO/Civil Society","Unknown", "Government", "Federal Government", "FedGov", "LocGov"))) %>% 
   mutate(party = entities.name) %>%
   drop_na(party) %>% 
-  mutate(total_spend_formatted = readr::parse_number(total_spend_formatted)) %>% 
-  mutate(total_num_ads = readr::parse_number(total_num_ads))%>% 
-  mutate(total_spend_pct = as.numeric(total_spend_pct))%>% 
-  mutate(num_ads = readr::parse_number(num_ads))
+  mutate(total_spend_formatted = readr::parse_number(as.character(total_spend_formatted))) %>% 
+  mutate(total_num_ads = readr::parse_number(as.character(total_num_ads)))%>% 
+  mutate(total_spend_pct = as.numeric(as.character(total_spend_pct)))%>% 
+  mutate(num_ads = readr::parse_number(as.character(num_ads)))
 
 
 
@@ -429,11 +429,11 @@ election_dat7 <- readRDS("../data/election_dat7.rds")  %>%
   mutate(internal_id = page_id) %>%
   filter(!(party %in% c("Reg", "Gov", "Sta", "Inv", "Pol", "Company","Government Institution","Independent", "Media Organization", "NGO/Civil Society","Unknown", "Government", "Federal Government", "FedGov", "LocGov"))) %>% 
   mutate(party = entities.name) %>%
-  drop_na(party)  %>% 
-  mutate(total_spend_formatted = readr::parse_number(total_spend_formatted)) %>% 
-  mutate(total_num_ads = readr::parse_number(total_num_ads))%>% 
-  mutate(total_spend_pct = as.numeric(total_spend_pct)) %>% 
-  mutate(num_ads = readr::parse_number(num_ads))
+  drop_na(party)   %>% 
+  mutate(total_spend_formatted = readr::parse_number(as.character(total_spend_formatted))) %>% 
+  mutate(total_num_ads = readr::parse_number(as.character(total_num_ads)))%>% 
+  mutate(total_spend_pct = as.numeric(as.character(total_spend_pct)))%>% 
+  mutate(num_ads = readr::parse_number(as.character(num_ads)))
   
 
 
