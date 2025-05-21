@@ -820,8 +820,8 @@ if (!exists("last7")) {
 # da90 <- mark_list[[3]]
 # 
 # da7 %>%  filter(page_id == "153080620724")
-da30 <- metatargetr::get_targeting_db("AU", 30, us_markers$ds[1]) 
-da7 <- metatargetr::get_targeting_db("AU", 7, us_markers$ds[1]) 
+da30 <- metatargetr::get_targeting_db("AU", 30, "2025-05-05") 
+da7 <- metatargetr::get_targeting_db("AU", 7, "2025-05-05") 
 
 
 # saveRDS(da90, "data/election_dat90.rds")
